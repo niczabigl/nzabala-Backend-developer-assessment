@@ -6,7 +6,7 @@
 	<groupId>com.nzabala</groupId>
 	<artifactId>backend-development-assessment</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<name>nzabala-backend-development-assessment</name>
 	<description>nzabala-backend-development-assessment</description>
@@ -68,6 +68,20 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-war-plugin</artifactId>
+			    <version>3.1.0</version>
+			    <executions>
+			        <execution>
+			            <id>default-war</id>
+			            <phase>prepare-package</phase>
+			            <configuration>
+			                <failOnMissingWebXml>false</failOnMissingWebXml>
+			            </configuration>
+			        </execution>
+			    </executions>
 			</plugin>
 		</plugins>
 	</build>
