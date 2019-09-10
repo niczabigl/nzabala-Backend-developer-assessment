@@ -9,6 +9,8 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -17,11 +19,13 @@ import com.nzabala.models.Client;
 import com.nzabala.services.ManagerI;
 import com.nzabala.utils.RequestUtils;
 
+@Service
+@Configurable
 public class ClientManagerImpl implements ManagerI {
 	
 	public static final String DATASOURCE = "http://www.mocky.io/v2/5808862710000087232b75ac";
 	
-	List<Client> clients = new ArrayList<Client>();
+	static List<Client> clients = new ArrayList<Client>();
 	
 	public ClientManagerImpl(){
 		this.getDataSource();
@@ -60,7 +64,7 @@ public class ClientManagerImpl implements ManagerI {
 	public ArrayList<?> filterDataById(String id) {
 		ArrayList<Client> clients = new ArrayList<Client>();
 		for(Client c : this.clients){
-			if(c.getId().equals(id)){
+			if(c.getId().contains(id)){
 				clients.add(c);
 			}
 		}
@@ -69,8 +73,13 @@ public class ClientManagerImpl implements ManagerI {
 
 	@Override
 	public ArrayList<?> filterDataByName(String name) {
-		this.clients.clear();
-		return null;
+		ArrayList<Client> clients = new ArrayList<Client>();
+		for(Client c : this.clients){
+			if(c.getName().contains(name)){
+				clients.add(c);
+			}
+		}
+		return clients;
 	}
 
 	public List<Client> getClients() {

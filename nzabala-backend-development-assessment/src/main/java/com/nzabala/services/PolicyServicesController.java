@@ -7,6 +7,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,8 +20,12 @@ import com.nzabala.models.Client;
 
 @RestController
 public class PolicyServicesController extends CustomResponse {
-
-private static Logger LOG = Logger.getLogger("log");
+	
+	@Autowired
+	PolicyManagerImpl policyImp;
+	
+	private static Logger LOG = Logger.getLogger("log");
+	
 	
 	@RequestMapping(value = "/policies", method = RequestMethod.GET)
 	@CrossOrigin()
@@ -28,8 +33,6 @@ private static Logger LOG = Logger.getLogger("log");
     public Response getAllPolicies() {
 		
 		LOG.info("GETTING all policies at: /policies");
-		PolicyManagerImpl policyImp = new PolicyManagerImpl();
-		policyImp.getDataSource();
 		
 		return buildResponse(!policyImp.getPolicies().isEmpty()?policyImp.getPolicies():null);	
     }
@@ -40,8 +43,7 @@ private static Logger LOG = Logger.getLogger("log");
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getClientByPolicyId(@PathVariable("id") String id) {
 		
-		LOG.info("GETTING /policies/clientid/{id} ->" + id);
-		PolicyManagerImpl policyImp = new PolicyManagerImpl();
+		LOG.info("GETTING /policies/policy/{id} ->" + id);
 		ArrayList<Client> resClient = policyImp.getClientByPolicyId(id);
 		
 		return buildResponse(resClient);
@@ -54,7 +56,6 @@ private static Logger LOG = Logger.getLogger("log");
 	public Response getUserPoliciesByUserName(@PathVariable("userName") String userName) {
 		
 		LOG.info("GETTING /policies/username/{userName} ->" + userName);
-		PolicyManagerImpl policyImp = new PolicyManagerImpl();
 		ArrayList<UserPolicies> resUp = policyImp.getUserPoliciesByUserName(userName);
 		
 		return buildResponse(resUp);

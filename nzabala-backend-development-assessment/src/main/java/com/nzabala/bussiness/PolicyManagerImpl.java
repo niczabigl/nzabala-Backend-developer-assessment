@@ -3,12 +3,18 @@ package com.nzabala.bussiness;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -19,18 +25,21 @@ import com.nzabala.models.Policy;
 import com.nzabala.services.ManagerI;
 import com.nzabala.utils.RequestUtils;
 
+@Service
+@Configurable
 public class PolicyManagerImpl implements ManagerI {
 
-public static final String DATASOURCE = "http://www.mocky.io/v2/580891a4100000e8242b75c5";
+	@Autowired
+	ClientManagerImpl clientManager;
+	
+	public static final String DATASOURCE = "http://www.mocky.io/v2/580891a4100000e8242b75c5";
 	
 	List<Policy> policies = new ArrayList<Policy>();
-	List<Client> clients = new ArrayList<Client>();
 	
 	public PolicyManagerImpl(){
-		this.getDataSource();
-		this.clients = new ClientManagerImpl().getClients();
 	}
 	
+	@PostConstruct
 	public void getDataSource() {
 		try {
 			URL url = RequestUtils.makeAndgetUrl(DATASOURCE);
@@ -42,8 +51,21 @@ public static final String DATASOURCE = "http://www.mocky.io/v2/580891a4100000e8
 				ObjectMapper om = new ObjectMapper();
 				JSONArray jsonPolicies = jsonResponse.has("policies") ? jsonResponse.getJSONArray("policies"): null;
 				if(jsonPolicies!=null){
-					for(int i = 0 ; i< jsonPolicies.length() ; i++){
-						policies.add(om.readValue(jsonPolicies.get(i).toString(), Policy.class));
+					for(int i = 0 ; i < jsonPolicies.length() ; i++){
+						JSONObject pjson = (JSONObject)jsonPolicies.get(i);
+						Policy p = new Policy(
+								pjson.getString("id"), 
+								new Float(pjson.getString("amountInsured")), 
+								pjson.getString("email"), 
+								new SimpleDateFormat("yyyy-MM-dd").parse(pjson.getString("inceptionDate")), 
+								new Boolean(pjson.getString("installmentPayment")));
+						List<Client> clients = clientManager.getClients();
+						int clientsize = clients.size();
+						for(int j = 0 ; j  < clientsize ; j ++) {
+							if(clients.get(j).getId().equals(pjson.getString("clientId")))
+								p.setClient(clients.get(j));
+						}
+						policies.add(p);
 					}
 				}
 			}
@@ -76,14 +98,14 @@ public static final String DATASOURCE = "http://www.mocky.io/v2/580891a4100000e8
 	public ArrayList<?> filterDataByName(String name) {
 		ArrayList<Policy> policies = new ArrayList<Policy>();
 		ArrayList<Client> clients = new ArrayList<Client>();
-		for (Client c : this.clients){
+		for (Client c : clientManager.getClients()){
 			if(c.getName().equals(name)){
 				clients.add(c);
 			}
 		}
 		for(Client c : clients){
 			for(Policy p : this.policies){
-				if(p.getClientId().equals(c.getId())){
+				if(p.getClient().getId().equals(c.getId())){
 					policies.add(p);
 				}
 			}
@@ -92,7 +114,7 @@ public static final String DATASOURCE = "http://www.mocky.io/v2/580891a4100000e8
 	}
 
 	public List<Policy> getPolicies() {
-		return this.policies;
+		return this.policies; 
 	}
 	
 	//user linked to a policy number
@@ -101,8 +123,8 @@ public static final String DATASOURCE = "http://www.mocky.io/v2/580891a4100000e8
 		ArrayList<Client> clients = new ArrayList<Client>();
 		ArrayList<Policy> policies = (ArrayList<Policy>)this.filterDataById(id);
 		if(policies != null && !policies.isEmpty()){
-			for(Client c :this.clients){
-				if(c.getId().equals(policies.get(0).getClientId())){
+			for(Client c : clientManager.getClients()){
+				if(c.getId().contains(policies.get(0).getClient().getId())){
 					clients.add(c);
 				}
 			}
@@ -116,13 +138,13 @@ public static final String DATASOURCE = "http://www.mocky.io/v2/580891a4100000e8
 		ArrayList<Policy> policies = (ArrayList<Policy>)this.filterDataByName(userName);
 		
 		if(policies != null && !policies.isEmpty()){
-			for(Client c :this.clients){
-				if(c.getName().equals(userName)){
+			for(Client c : clientManager.getClients()){
+				if(c.getName().contains(userName)){
 					UserPolicies up = new UserPolicies();
 					up.setUserId(c.getId());
 					up.setUserName(c.getName());
 					for(Policy p : policies){
-						if(c.getId().equals(p.getClientId())){
+						if(c.getId().equals(p.getClient().getId())){
 							up.addPolicy(p);
 						}
 					}

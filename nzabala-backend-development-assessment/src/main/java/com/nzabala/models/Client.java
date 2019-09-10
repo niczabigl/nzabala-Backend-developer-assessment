@@ -1,19 +1,48 @@
 package com.nzabala.models;
 
-import com.nzabala.enums.Role;
+import java.io.Serializable;
 
-public class Client {
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+@Entity
+@Table(name="CLIENT")
+@EntityListeners(AuditingEntityListener.class)
+public class Client implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@Column(name="cliid")
 	private String id;
+	
+	@Column(name="cliname")
 	private String name;
+	
+	@Column(name="cliemail")
 	private String email;
-	private Role role;
+	
+	@Column(name="clirole")
+	private String role;
+	
+	@OneToOne(mappedBy = "client")
+    private Policy policy;
 	
 	public Client(){
 		
 	}
 	
-	public Client(String id, String name, String email, Role role){
+	public Client(String id, String name, String email, String role){
 		this.id = id;
 		this.name = name;
 		this.email = email;
@@ -44,12 +73,17 @@ public class Client {
 		this.email = email;
 	}
 
-	public Role getRole() {
+	public String getRole() {
 		return role;
 	}
 
-	public void setRole(Role role) {
+	public void setRole(String role) {
 		this.role = role;
+	}
+	
+	@Override
+	public String toString() {
+		return "Client [id=" + id + ", name=" + name + ", email=" + email + ", role=" + role + "]";
 	}
 	
 	
