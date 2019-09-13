@@ -9,6 +9,11 @@
 .settings
 .springBeans
 .sts4-cache
+.metadata
+.recommenders
+RemoteSystemTempFiles
+Servers
+
 
 ### IntelliJ IDEA ###
 .idea
