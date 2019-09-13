@@ -35,8 +35,8 @@ public class Client implements Serializable {
 	@Column(name="clirole")
 	private String role;
 	
-	@OneToOne(mappedBy = "client")
-    private Policy policy;
+//	@OneToOne(mappedBy = "client")
+//    private Policy policy;
 	
 	public Client(){
 		
